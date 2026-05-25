@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Provider, ReasoningEffort, AppState } from '../../types';
 import { PROVIDERS } from '../../config/providers';
 import LMStudioBanner from '../LMStudioBanner/LMStudioBanner';
@@ -19,10 +20,50 @@ const EFFORT_LEVELS: { value: ReasoningEffort; label: string }[] = [
   { value: 'high',   label: 'High'   },
 ];
 
+/** Derive /v1/models URL from the chat completions endpoint. */
+function modelsUrl(chatEndpoint: string): string {
+  try {
+    const u = new URL(chatEndpoint);
+    return `${u.protocol}//${u.host}/v1/models`;
+  } catch {
+    return 'http://localhost:1234/v1/models';
+  }
+}
+
+type FetchState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'ok'; models: string[] }
+  | { status: 'err'; msg: string };
+
 export default function ProviderConfig({ provider, config, onProviderChange, onConfigChange }: Props) {
   const cfg = PROVIDERS[provider];
   const showEffort = cfg.supportsReasoningEffort ?? false;
   const effortLabel = cfg.supportsThinkingBudget ? 'Thinking Budget' : 'Reasoning Effort';
+
+  const [fetchState, setFetchState] = useState<FetchState>({ status: 'idle' });
+
+  async function fetchActiveModel() {
+    setFetchState({ status: 'loading' });
+    try {
+      const res = await fetch(modelsUrl(config.endpoint), { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json() as { data?: { id: string }[] };
+      const models = (data.data ?? []).map(m => m.id).filter(Boolean);
+      if (models.length === 0) {
+        setFetchState({ status: 'err', msg: 'No models loaded — start one in LM Studio first' });
+        return;
+      }
+      // Auto-fill if only one model; show picker if multiple
+      if (models.length === 1) {
+        onConfigChange('model', models[0]);
+      }
+      setFetchState({ status: 'ok', models });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setFetchState({ status: 'err', msg: `Cannot reach LM Studio: ${msg}` });
+    }
+  }
 
   return (
     <section className={s.panel} id="panel-1">
@@ -39,7 +80,7 @@ export default function ProviderConfig({ provider, config, onProviderChange, onC
             <button
               key={key}
               className={`${s.providerBtn} ${isActive ? s.active : ''}`}
-              onClick={() => onProviderChange(key)}
+              onClick={() => { onProviderChange(key); setFetchState({ status: 'idle' }); }}
             >
               <div className={s.providerName}>{p.name}</div>
               <div className={s.providerLoc}>{p.endpoint.replace('https://', '').replace('http://', '').split('/')[0]}</div>
@@ -68,8 +109,23 @@ export default function ProviderConfig({ provider, config, onProviderChange, onC
             onChange={e => onConfigChange('endpoint', e.target.value)}
           />
         </div>
+
+        {/* Model Name — with auto-detect button for LM Studio */}
         <div className={s.configField}>
-          <label htmlFor="provider-model">Model Name</label>
+          <div className={s.modelLabelRow}>
+            <label htmlFor="provider-model">Model Name</label>
+            {provider === 'lmstudio' && (
+              <button
+                type="button"
+                className={`${s.fetchBtn} ${fetchState.status === 'loading' ? s.fetchBtnLoading : ''}`}
+                onClick={fetchActiveModel}
+                disabled={fetchState.status === 'loading'}
+                title="Fetch active model from LM Studio"
+              >
+                {fetchState.status === 'loading' ? '…' : '↻ Auto-detect'}
+              </button>
+            )}
+          </div>
           <input
             id="provider-model"
             name="provider-model"
@@ -77,9 +133,33 @@ export default function ProviderConfig({ provider, config, onProviderChange, onC
             autoComplete="off"
             value={config.model}
             spellCheck={false}
-            onChange={e => onConfigChange('model', e.target.value)}
+            onChange={e => { onConfigChange('model', e.target.value); setFetchState({ status: 'idle' }); }}
           />
+
+          {/* Status / model picker */}
+          {fetchState.status === 'err' && (
+            <div className={s.fetchErr}>{fetchState.msg}</div>
+          )}
+          {fetchState.status === 'ok' && fetchState.models.length > 1 && (
+            <div className={s.modelPicker}>
+              <div className={s.modelPickerLabel}>Select loaded model:</div>
+              {fetchState.models.map(m => (
+                <button
+                  key={m}
+                  type="button"
+                  className={`${s.modelPickerBtn} ${config.model === m ? s.modelPickerBtnActive : ''}`}
+                  onClick={() => onConfigChange('model', m)}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          )}
+          {fetchState.status === 'ok' && fetchState.models.length === 1 && (
+            <div className={s.fetchOk}>✓ Auto-filled: {fetchState.models[0]}</div>
+          )}
         </div>
+
         <div className={`${s.configField} ${!cfg.needsKey ? s.hidden : ''}`}>
           <label htmlFor="provider-api-key">API Key <span style={{ fontStyle: 'italic', color: 'var(--ink-mute)' }}>(not needed for LM Studio)</span></label>
           <input

@@ -3,7 +3,7 @@ import { xorDecrypt } from './xor';
 import type { Provider, ReasoningEffort } from '../types';
 
 const MAX_TOKENS = 4000;
-const REQUEST_TIMEOUT_MS = 45000;
+const REQUEST_TIMEOUT_MS = 300000; // 5 minutes — local models can be slow
 
 /** Maps effort level to Gemini thinking_budget token count. */
 const THINKING_BUDGET: Record<ReasoningEffort, number> = {
