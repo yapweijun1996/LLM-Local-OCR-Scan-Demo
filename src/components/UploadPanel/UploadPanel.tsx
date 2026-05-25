@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { FileEntry } from '../../types';
 import { fileToBase64 } from '../../services/fileUtils';
 import { renderPdfToImages } from '../../services/pdf';
@@ -40,7 +40,6 @@ function ImageModal({ file, onClose }: { file: FileEntry; onClose: () => void })
 }
 
 export default function UploadPanel({ files, activeFileId, onAddFile, onRemoveFile, onSetActive }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragover, setDragover] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [previewFile, setPreviewFile] = useState<FileEntry | null>(null);
@@ -92,10 +91,8 @@ export default function UploadPanel({ files, activeFileId, onAddFile, onRemoveFi
           onDragOver={e => { e.preventDefault(); setDragover(true); }}
           onDragLeave={e => { e.preventDefault(); setDragover(false); }}
           onDrop={e => { e.preventDefault(); setDragover(false); handleFiles(Array.from(e.dataTransfer.files)); }}
-          onClick={() => fileInputRef.current?.click()}
         >
           <input
-            ref={fileInputRef}
             type="file"
             accept="image/*,application/pdf"
             multiple
