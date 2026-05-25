@@ -54,7 +54,11 @@ export function postProcess(rawText: string): TableData {
 }
 
 export function extractFirstJSON(text: string): unknown {
-  const s = text.replace(/```json\s*|\s*```/g, '').trim();
+  // NOTE: Do NOT pre-strip code fences (```json … ```). The brace counter below
+  // already skips any prefix/suffix text (including code fences), and a global
+  // regex strip would silently corrupt JSON string values that contain triple
+  // backticks, e.g. {"desc": "see ``` example"}.
+  const s = text;
   let depth = 0, start = -1, end = -1, inStr = false, esc = false;
 
   for (let i = 0; i < s.length; i++) {

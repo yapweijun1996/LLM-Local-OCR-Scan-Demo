@@ -146,6 +146,19 @@ export async function callLLM({ endpoint, model, apiKey, temperature, base64, mi
     throw new Error(`HTTP ${res.status}: ${txt.slice(0, 200)}`);
   }
 
+  // Verify the response body is actually JSON before parsing — captive portals,
+  // misconfigured proxies, and wrong endpoint paths return HTML with HTTP 200,
+  // which produces a useless 'Unexpected token <' SyntaxError otherwise.
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.toLowerCase().includes('json')) {
+    const txt = await res.text();
+    throw new Error(
+      `Expected JSON response but server returned '${contentType || 'no content-type'}'. ` +
+      `Possible cause: proxy / captive portal / wrong endpoint URL. ` +
+      `First bytes: ${txt.slice(0, 200)}`,
+    );
+  }
+
   const data = await res.json();
 
   if (isResponsesApi) {

@@ -30,6 +30,16 @@ function modelsUrl(chatEndpoint: string): string {
   }
 }
 
+/** AbortSignal.timeout() is Safari ≥ 17.4 / Chrome ≥ 103; fall back for older WKWebView. */
+function timeoutSignal(ms: number): AbortSignal {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
 type FetchState =
   | { status: 'idle' }
   | { status: 'loading' }
@@ -46,7 +56,7 @@ export default function ProviderConfig({ provider, config, onProviderChange, onC
   async function fetchActiveModel() {
     setFetchState({ status: 'loading' });
     try {
-      const res = await fetch(modelsUrl(config.endpoint), { signal: AbortSignal.timeout(5000) });
+      const res = await fetch(modelsUrl(config.endpoint), { signal: timeoutSignal(5000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json() as { data?: { id: string }[] };
       const models = (data.data ?? []).map(m => m.id).filter(Boolean);

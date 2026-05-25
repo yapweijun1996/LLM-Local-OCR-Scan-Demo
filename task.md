@@ -126,16 +126,16 @@ Ranked by severity. Each entry is a real bug or risk surfaced by a high-recall 3
 7. ~~**`useAppState.ts:36` — `SET_PROVIDER` does not reset `reasoningEffort`.**~~ ✅ Reducer now resets `reasoningEffort: 'medium'` alongside `endpoint/model/apiKey`.
 8. ~~**`accuracy.ts:31` — Row match fails on leading-zero `No` ('01' vs '1').**~~ ✅ New `normalizeNo()` helper trims + drops leading zeros; applied in row lookup, `truthByNo` map, and `extraRows` filter.
 
-### Tier 3 — Defensive / UX
+### Tier 3 — Defensive / UX ✅ FIXED (commit pending)
 
-9. **`llm.ts:145` — `res.json()` without content-type check.** Captive portal HTML throws `Unexpected token <`. Inspect `Content-Type` first and throw a clearer error.
-10. **`postProcess.ts:46` — `extractFirstJSON` global ` ```json ` strip + naive brace counter.** Triple-backticks inside string values are eaten; `\uXXXX` escapes can mis-track depth. Replace with a tolerant JSON parser (e.g., `jsonrepair`) or scoped fence detection.
+9. ~~**`llm.ts:145` — `res.json()` without content-type check.**~~ ✅ Inspect `Content-Type` header; throw explicit "Expected JSON but server returned '<ct>'. Possible cause: proxy / captive portal / wrong endpoint URL. First bytes: …" on mismatch.
+10. ~~**`postProcess.ts:46` — `extractFirstJSON` global ``` strip + naive brace counter.**~~ ✅ Removed the pre-strip entirely — the brace counter already correctly skips prefix/suffix text including code fences. Triple-backticks inside string values are now preserved.
 
-### Lower-priority / Compatibility
+### Lower-priority / Compatibility ✅ FIXED (commit pending)
 
-- `ProviderConfig.tsx:49` — `AbortSignal.timeout(5000)` requires Safari ≥ 17.4 / Chrome ≥ 103. Add fallback `AbortController` + `setTimeout` for older WKWebViews.
-- `historyDb.ts` — `saveHistoryRecord` + `pruneHistoryRecords` are separate transactions; concurrent saves can race past `MAX_HISTORY_RECORDS = 50`.
-- `xor.ts` — No length validation in `xorDecrypt`; a truncated payload silently produces a corrupted key. Add `if (clean.length % 3 !== 0) throw …`.
+- ~~`ProviderConfig.tsx:49` — `AbortSignal.timeout(5000)` requires Safari ≥ 17.4 / Chrome ≥ 103.~~ ✅ Added `timeoutSignal(ms)` helper with feature detection; falls back to `AbortController` + `setTimeout` on older WKWebViews.
+- ~~`historyDb.ts` — `saveHistoryRecord` + `pruneHistoryRecords` are separate transactions; concurrent saves can race past `MAX_HISTORY_RECORDS = 50`.~~ ✅ Merged put + prune into a single readwrite transaction. IDB serializes concurrent transactions on the same store so multi-page saves cannot race.
+- ~~`xor.ts` — No length validation in `xorDecrypt`; a truncated payload silently produces a corrupted key.~~ ✅ Validates non-empty, length % 3 === 0, all-digits, and byte ≤ 255; throws actionable errors instead of silently corrupting.
 
 ---
 

@@ -48,25 +48,43 @@ export async function listHistoryRecords(): Promise<HistoryRecord[]> {
   return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+/** Atomic save + prune: both operations run in a single IDB transaction so concurrent
+ *  saveHistoryRecord calls (e.g. multi-page PDF extraction) serialize correctly and
+ *  cannot race past MAX_HISTORY_RECORDS or torn-write each other. */
 export async function saveHistoryRecord(record: HistoryRecord): Promise<void> {
   if (typeof indexedDB === 'undefined') return;
 
-  await withStore<IDBValidKey>('readwrite', store => store.put(record));
-  await pruneHistoryRecords();
+  const db = await openHistoryDb();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+
+      // 1. Insert / update the new record.
+      store.put(record);
+
+      // 2. Within the SAME transaction, fetch all keys + createdAt to prune excess.
+      //    Using getAll() so we can sort by createdAt deterministically.
+      const getAllReq = store.getAll() as IDBRequest<HistoryRecord[]>;
+      getAllReq.onsuccess = () => {
+        const all = getAllReq.result.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const expired = all.slice(MAX_HISTORY_RECORDS);
+        for (const r of expired) {
+          store.delete(r.id);
+        }
+      };
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error('IndexedDB save+prune transaction failed'));
+      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'));
+    });
+  } finally {
+    db.close();
+  }
 }
 
 export async function clearHistoryRecords(): Promise<void> {
   if (typeof indexedDB === 'undefined') return;
 
   await withStore<undefined>('readwrite', store => store.clear() as IDBRequest<undefined>);
-}
-
-async function pruneHistoryRecords(): Promise<void> {
-  const records = await listHistoryRecords();
-  const expired = records.slice(MAX_HISTORY_RECORDS);
-  if (expired.length === 0) return;
-
-  await Promise.all(expired.map(record => (
-    withStore<undefined>('readwrite', store => store.delete(record.id) as IDBRequest<undefined>)
-  )));
 }
