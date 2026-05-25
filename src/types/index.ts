@@ -21,6 +21,9 @@ export interface FileEntry {
   id: string;
   name: string;
   base64: string;
+  /** Source MIME type (image/jpeg, image/png, image/webp). PDF pages → 'image/jpeg'.
+   *  Optional for backward compatibility; consumers should default to 'image/jpeg'. */
+  mimeType?: string;
   isBenchmark: boolean;
   fromHistory?: boolean;
 }
@@ -103,9 +106,11 @@ export interface HistoryRecord {
   createdAt: string;
   isBenchmark: boolean;
   result: ExtractionResult;
-  /** base64 JPEG of the source image. Stored so the thumbnail is visible on restore.
+  /** base64 of the source image. Stored so the thumbnail is visible on restore.
    *  Optional for backward compatibility with records saved before this field existed. */
   base64?: string;
+  /** MIME type of the source image. Optional for backward compat (defaults to image/jpeg). */
+  mimeType?: string;
 }
 
 export type AppAction =

@@ -54,6 +54,7 @@ export default function App() {
       isBenchmark: file.isBenchmark,
       result,
       base64: file.base64 || undefined,  // persist image so thumbnail shows on restore
+      mimeType: file.mimeType,           // persist MIME so restored image renders / re-extracts correctly
     };
 
     await saveHistoryRecord(record);
@@ -65,7 +66,8 @@ export default function App() {
       {
         id: `history-${record.id}-${Date.now()}`,
         name: record.fileName,
-        base64: record.base64 ?? '',   // restore image so thumbnail is visible
+        base64: record.base64 ?? '',   // empty string → ExtractionPanel skips re-running; UI shows History placeholder
+        mimeType: record.mimeType,
         isBenchmark: record.isBenchmark,
         fromHistory: true,
       },

@@ -31,7 +31,7 @@ function ImageModal({ file, onClose }: { file: FileEntry; onClose: () => void })
           <button className={s.modalClose} onClick={onClose} aria-label="Close preview">×</button>
         </div>
         {file.base64
-          ? <img src={`data:image/jpeg;base64,${file.base64}`} alt={file.name} className={s.modalImg} />
+          ? <img src={`data:${file.mimeType ?? 'image/jpeg'};base64,${file.base64}`} alt={file.name} className={s.modalImg} />
           : <div className={s.modalPlaceholder}>No image data available</div>
         }
       </div>
@@ -51,14 +51,16 @@ export default function UploadPanel({ files, activeFileId, onAddFile, onRemoveFi
         if (f.type === 'application/pdf') {
           const pages = await renderPdfToImages(f);
           pages.forEach((base64, index) => {
-            onAddFile({ id: nextId(), name: `${f.name} · page ${index + 1}`, base64, isBenchmark: false });
+            // pdf.ts always renders to JPEG via canvas.toDataURL('image/jpeg', 0.92)
+            onAddFile({ id: nextId(), name: `${f.name} · page ${index + 1}`, base64, mimeType: 'image/jpeg', isBenchmark: false });
           });
           continue;
         }
 
         if (!f.type.startsWith('image/')) continue;
         const base64 = await fileToBase64(f);
-        onAddFile({ id: nextId(), name: f.name, base64, isBenchmark: false });
+        // Preserve original MIME (image/png, image/webp, image/jpeg) — cloud LLMs validate it
+        onAddFile({ id: nextId(), name: f.name, base64, mimeType: f.type, isBenchmark: false });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         setUploadError(`Could not import ${f.name}: ${msg}`);
@@ -70,7 +72,7 @@ export default function UploadPanel({ files, activeFileId, onAddFile, onRemoveFi
     const res = await fetch(poSampleUrl);
     const blob = await res.blob();
     const base64 = await fileToBase64(new File([blob], 'PO-benchmark.jpg', { type: 'image/jpeg' }));
-    onAddFile({ id: nextId(), name: 'PO-benchmark.jpg', base64, isBenchmark: true });
+    onAddFile({ id: nextId(), name: 'PO-benchmark.jpg', base64, mimeType: 'image/jpeg', isBenchmark: true });
   }
 
   function openPreview(e: React.MouseEvent, file: FileEntry) {
@@ -129,7 +131,7 @@ export default function UploadPanel({ files, activeFileId, onAddFile, onRemoveFi
               title="Click to select · Click ⤢ to preview"
             >
               {f.base64
-                ? <img src={`data:image/jpeg;base64,${f.base64}`} alt="" aria-hidden="true" className={s.thumbImg} />
+                ? <img src={`data:${f.mimeType ?? 'image/jpeg'};base64,${f.base64}`} alt="" aria-hidden="true" className={s.thumbImg} />
                 : <div className={s.thumbPlaceholder}>History</div>}
               <div className={s.thumbOverlay}>{f.name.slice(0, 20)}</div>
               {f.isBenchmark && <span className={s.thumbTag}>Benchmark</span>}

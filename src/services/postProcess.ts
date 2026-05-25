@@ -1,14 +1,21 @@
 import type { TableData } from '../types';
 
 interface RawTable {
-  header: string[];
-  rows: Record<string, string>[];
+  header?: string[];
+  rows?: Record<string, string>[];
 }
 
 export function postProcess(rawText: string): TableData {
-  const json = extractFirstJSON(rawText) as unknown as RawTable;
+  const parsed = extractFirstJSON(rawText);
 
-  if (json.rows && json.rows.length > 0) {
+  // Type guard: model may return null, array, or other shapes
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Model output is not a JSON object — expected { header, rows }');
+  }
+
+  const json = parsed as RawTable;
+
+  if (Array.isArray(json.rows) && json.rows.length > 0) {
     const keysFromRow = Object.keys(json.rows[0]);
     if (!json.header || json.header.length !== keysFromRow.length || json.header.some((h: string) => h.length < 2)) {
       json.header = keysFromRow;
@@ -39,7 +46,11 @@ export function postProcess(rawText: string): TableData {
       .replace(/\bdelivry\b/gi, 'delivery');
   });
 
-  return json as TableData;
+  // Normalize: guarantee TableData shape so callers can safely access .rows.length / .header.length
+  return {
+    header: Array.isArray(json.header) ? json.header : [],
+    rows: Array.isArray(json.rows) ? json.rows : [],
+  };
 }
 
 export function extractFirstJSON(text: string): unknown {

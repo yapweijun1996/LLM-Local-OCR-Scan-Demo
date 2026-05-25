@@ -19,6 +19,9 @@ interface LLMOptions {
   apiKey: string;
   temperature: number;
   base64: string;
+  /** MIME type of the source image (e.g. 'image/png', 'image/webp', 'image/jpeg').
+   *  Defaults to 'image/jpeg' for backward compat. Strict providers reject mislabeled bytes. */
+  mimeType?: string;
   provider?: Provider;
   /** The extraction prompt to send. Callers must supply this — no longer hardcoded here. */
   prompt: string;
@@ -27,14 +30,14 @@ interface LLMOptions {
 }
 
 /** Build request body for OpenAI Chat Completions (/v1/chat/completions) */
-function buildChatBody(model: string, temperature: number, base64: string, prompt: string): Record<string, unknown> {
+function buildChatBody(model: string, temperature: number, base64: string, mime: string, prompt: string): Record<string, unknown> {
   return {
     model,
     messages: [{
       role: 'user',
       content: [
         { type: 'text', text: prompt },
-        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
+        { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } },
       ],
     }],
     temperature,
@@ -43,14 +46,14 @@ function buildChatBody(model: string, temperature: number, base64: string, promp
 }
 
 /** Build request body for OpenAI Responses API (/v1/responses) */
-function buildResponsesBody(model: string, base64: string, prompt: string, effort: ReasoningEffort): Record<string, unknown> {
+function buildResponsesBody(model: string, base64: string, mime: string, prompt: string, effort: ReasoningEffort): Record<string, unknown> {
   const body: Record<string, unknown> = {
     model,
     input: [{
       role: 'user',
       content: [
         { type: 'input_text', text: prompt },
-        { type: 'input_image', image_url: `data:image/jpeg;base64,${base64}` },
+        { type: 'input_image', image_url: `data:${mime};base64,${base64}` },
       ],
     }],
     stream: false,
@@ -85,7 +88,8 @@ function extractResponsesText(data: unknown): string {
   return String(textItem?.text ?? '');
 }
 
-export async function callLLM({ endpoint, model, apiKey, temperature, base64, provider, prompt, reasoningEffort }: LLMOptions): Promise<string> {
+export async function callLLM({ endpoint, model, apiKey, temperature, base64, mimeType, provider, prompt, reasoningEffort }: LLMOptions): Promise<string> {
+  const mime = mimeType ?? 'image/jpeg';
   // Resolve provider config flags
   const cfg = provider ? PROVIDERS[provider] : undefined;
   const isResponsesApi = cfg?.isResponsesApi ?? false;
@@ -104,9 +108,9 @@ export async function callLLM({ endpoint, model, apiKey, temperature, base64, pr
 
   if (isResponsesApi) {
     // OpenAI Responses API: reasoning.effort
-    body = buildResponsesBody(model, base64, prompt, reasoningEffort);
+    body = buildResponsesBody(model, base64, mime, prompt, reasoningEffort);
   } else {
-    body = buildChatBody(model, temperature, base64, prompt);
+    body = buildChatBody(model, temperature, base64, mime, prompt);
 
     if (cfg?.supportsThinkingBudget) {
       // Gemini OpenAI-compat endpoint: thinking_config.thinking_budget

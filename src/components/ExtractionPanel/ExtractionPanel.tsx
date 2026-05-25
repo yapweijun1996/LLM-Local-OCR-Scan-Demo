@@ -61,6 +61,13 @@ export default function ExtractionPanel({ state, onSetRunning, onSetResult, onSe
 
     for (const file of state.files) {
       addLog(`Processing: ${file.name}…`);
+
+      // Skip files without image data (e.g. legacy history records before base64 was persisted)
+      if (!file.base64) {
+        addLog(`⚠ Skipped ${file.name}: no image data (legacy history record). Re-upload the source file.`, 'warn');
+        continue;
+      }
+
       try {
         addLog(`→ Calling ${PROVIDERS[state.provider].name}…`);
         const raw = await callLLM({
@@ -69,6 +76,7 @@ export default function ExtractionPanel({ state, onSetRunning, onSetResult, onSe
           apiKey,
           temperature,
           base64: file.base64,
+          mimeType: file.mimeType,
           provider: state.provider,
           prompt: customPrompt,
           reasoningEffort: state.config.reasoningEffort,
