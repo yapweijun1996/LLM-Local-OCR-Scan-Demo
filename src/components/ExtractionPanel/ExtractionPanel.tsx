@@ -25,9 +25,13 @@ interface Props {
 
 export default function ExtractionPanel({ state, onSetRunning, onSetResult, onSetStep }: Props) {
   const logRef = useRef<HTMLDivElement>(null);
+  // useRef mutex — synchronous guard against double-tap that races React state batching.
+  const runningRef = useRef(false);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [customPrompt, setCustomPrompt] = useState<string>(
-    () => localStorage.getItem(PROMPT_STORAGE_KEY) ?? PROMPT,
+    // Use || (not ??) so an empty-string in storage falls back to PROMPT default,
+    // preventing a blank prompt from silently persisting across sessions.
+    () => localStorage.getItem(PROMPT_STORAGE_KEY) || PROMPT,
   );
   const [promptOpen, setPromptOpen] = useState(true);
 
@@ -38,7 +42,13 @@ export default function ExtractionPanel({ state, onSetRunning, onSetResult, onSe
 
   function handlePromptChange(value: string) {
     setCustomPrompt(value);
-    localStorage.setItem(PROMPT_STORAGE_KEY, value);
+    // Don't persist a whitespace-only / empty value — leaves localStorage clean so
+    // the next session sees no key and falls back to PROMPT.
+    if (value.trim()) {
+      localStorage.setItem(PROMPT_STORAGE_KEY, value);
+    } else {
+      localStorage.removeItem(PROMPT_STORAGE_KEY);
+    }
   }
 
   function resetPrompt() {
@@ -52,65 +62,74 @@ export default function ExtractionPanel({ state, onSetRunning, onSetResult, onSe
   }
 
   async function runExtraction() {
-    if (state.running || state.files.length === 0) return;
+    // Synchronous mutex via ref — React state setter is async so two rapid taps
+    // both see state.running === false. The ref flips immediately.
+    if (runningRef.current || state.files.length === 0) return;
+    runningRef.current = true;
+
     setLogs([]);
     onSetRunning(true);
     onSetStep(3);
 
     const { endpoint, model, apiKey, temperature } = state.config;
 
-    for (const file of state.files) {
-      addLog(`Processing: ${file.name}…`);
+    try {
+      for (const file of state.files) {
+        addLog(`Processing: ${file.name}…`);
 
-      // Skip files without image data (e.g. legacy history records before base64 was persisted)
-      if (!file.base64) {
-        addLog(`⚠ Skipped ${file.name}: no image data (legacy history record). Re-upload the source file.`, 'warn');
-        continue;
-      }
-
-      try {
-        addLog(`→ Calling ${PROVIDERS[state.provider].name}…`);
-        const raw = await callLLM({
-          endpoint,
-          model,
-          apiKey,
-          temperature,
-          base64: file.base64,
-          mimeType: file.mimeType,
-          provider: state.provider,
-          prompt: customPrompt,
-          reasoningEffort: state.config.reasoningEffort,
-        });
-        addLog(`→ Raw output received (${raw.length} chars)`, 'ok');
-
-        const cleaned = postProcess(raw);
-        addLog(`→ Parsed ${cleaned.rows.length} rows, ${cleaned.header.length} columns`, 'ok');
-
-        const mathIssues = validateMath(cleaned.rows);
-        if (mathIssues.length > 0) {
-          mathIssues.forEach(i => addLog(`⚠ Math mismatch row ${i.no}: ${i.msg}`, 'warn'));
-        } else {
-          addLog('→ All math checks passed', 'ok');
+        // Skip files without image data (e.g. legacy history records before base64 was persisted)
+        if (!file.base64) {
+          addLog(`⚠ Skipped ${file.name}: no image data (legacy history record). Re-upload the source file.`, 'warn');
+          continue;
         }
 
-        let accuracy = null;
-        if (file.isBenchmark) {
-          accuracy = computeAccuracy(cleaned, GROUND_TRUTH);
-          addLog(`→ Benchmark accuracy: ${accuracy.overallPct}% (${accuracy.cellsMatched}/${accuracy.cellsTotal} cells)`, accuracy.overallPct >= 90 ? 'ok' : 'warn');
-        }
+        try {
+          addLog(`→ Calling ${PROVIDERS[state.provider].name}…`);
+          const raw = await callLLM({
+            endpoint,
+            model,
+            apiKey,
+            temperature,
+            base64: file.base64,
+            mimeType: file.mimeType,
+            provider: state.provider,
+            prompt: customPrompt,
+            reasoningEffort: state.config.reasoningEffort,
+          });
+          addLog(`→ Raw output received (${raw.length} chars)`, 'ok');
 
-        onSetResult(file.id, { raw, cleaned, accuracy, issues: mathIssues, isBenchmark: file.isBenchmark });
-        addLog(`✓ ${file.name} complete`, 'ok');
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        addLog(`✗ Error: ${msg}`, 'err');
-        onSetResult(file.id, { raw: null, cleaned: null, accuracy: null, issues: [], isBenchmark: file.isBenchmark, error: msg });
+          const cleaned = postProcess(raw);
+          addLog(`→ Parsed ${cleaned.rows.length} rows, ${cleaned.header.length} columns`, 'ok');
+
+          const mathIssues = validateMath(cleaned.rows);
+          if (mathIssues.length > 0) {
+            mathIssues.forEach(i => addLog(`⚠ Math mismatch row ${i.no}: ${i.msg}`, 'warn'));
+          } else {
+            addLog('→ All math checks passed', 'ok');
+          }
+
+          let accuracy = null;
+          if (file.isBenchmark) {
+            accuracy = computeAccuracy(cleaned, GROUND_TRUTH);
+            addLog(`→ Benchmark accuracy: ${accuracy.overallPct}% (${accuracy.cellsMatched}/${accuracy.cellsTotal} cells)`, accuracy.overallPct >= 90 ? 'ok' : 'warn');
+          }
+
+          onSetResult(file.id, { raw, cleaned, accuracy, issues: mathIssues, isBenchmark: file.isBenchmark });
+          addLog(`✓ ${file.name} complete`, 'ok');
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          addLog(`✗ Error: ${msg}`, 'err');
+          onSetResult(file.id, { raw: null, cleaned: null, accuracy: null, issues: [], isBenchmark: file.isBenchmark, error: msg });
+        }
       }
+
+      onSetStep(4);
+      addLog('Extraction complete. See results below.', 'ok');
+    } finally {
+      // Always release the mutex and clear React state, even if the loop throws.
+      runningRef.current = false;
+      onSetRunning(false);
     }
-
-    onSetRunning(false);
-    onSetStep(4);
-    addLog('Extraction complete. See results below.', 'ok');
   }
 
   const providerName = PROVIDERS[state.provider].name;

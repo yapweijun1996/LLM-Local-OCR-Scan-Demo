@@ -36,6 +36,9 @@ function reducer(state: AppState, action: AppAction): AppState {
           endpoint: action.endpoint,
           model: action.model,
           apiKey: '',
+          // Reset effort to a sensible default — a 'high' setting tuned for Gemini
+          // would bleed into OpenAI o-series billing if preserved.
+          reasoningEffort: 'medium',
         },
       };
     }

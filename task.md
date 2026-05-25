@@ -112,19 +112,19 @@ Extend the demo with a built-in zero-config provider, per-provider reasoning con
 
 Ranked by severity. Each entry is a real bug or risk surfaced by a high-recall 3-angle review. Most are simple fixes (≤5 lines).
 
-### Tier 1 — Crash / Wire-Protocol Bugs
+### Tier 1 — Crash / Wire-Protocol Bugs ✅ FIXED (commit `1f96bd5`)
 
-1. **`postProcess.ts:11` — `json.rows.length` crash when model omits `rows`.** A valid JSON response of shape `{"header": [...]}` throws `TypeError: Cannot read properties of undefined`. Wrap with `if (Array.isArray(json.rows) && json.rows.length > 0)`.
-2. **`fileUtils.ts:9` + `llm.ts:37/53` — PNG/WebP labeled as JPEG.** `fileToBase64` strips the MIME prefix; downstream wraps as `data:image/jpeg;base64,…` unconditionally. Strict providers reject. Either carry the MIME forward or re-encode via canvas.
-3. **`App.tsx:68` — `record.base64 ?? ''` produces broken requests.** Restoring a pre-base64 history record and re-running extraction posts `data:image/jpeg;base64,` with empty payload. Either guard in `ExtractionPanel` or use `undefined` so the file is skippable.
+1. ~~**`postProcess.ts:11` — `json.rows.length` crash when model omits `rows`.**~~ ✅ Added type-guard for parsed JSON (rejects non-objects, arrays, null); normalized return shape to always `{ header: [], rows: [] }`.
+2. ~~**`fileUtils.ts:9` + `llm.ts:37/53` — PNG/WebP labeled as JPEG.**~~ ✅ Added optional `mimeType` to `FileEntry` and `HistoryRecord`; UploadPanel stores `f.type` (PDFs → `image/jpeg`); `callLLM` accepts `mimeType` and uses real MIME in both Chat Completions and Responses API data URLs.
+3. ~~**`App.tsx:68` — `record.base64 ?? ''` produces broken requests.**~~ ✅ ExtractionPanel now skips files with `!file.base64` and logs `"Skipped ... no image data ... re-upload the source file"`.
 
-### Tier 2 — Silent Logic Bugs
+### Tier 2 — Silent Logic Bugs ✅ FIXED (commit pending)
 
-4. **`accuracy.ts:14` — Division by zero → `Infinity`.** `(t / q).toFixed(2)` when `q === 0`. Guard `if (q === 0)` and skip the suggestion.
-5. **`ExtractionPanel.tsx:30` — Empty prompt persists via `?? PROMPT`.** Use `|| PROMPT` (also falls back on `''`) or block empty saves.
-6. **`ExtractionPanel.tsx:54` — Double-tap race on `Start Extraction`.** `state.running` check reads stale React state. Use a `useRef`-based mutex.
-7. **`useAppState.ts:36` — `SET_PROVIDER` does not reset `reasoningEffort`.** A `'high'` setting from Gemini bleeds into OpenAI o-series billing. Add `reasoningEffort: 'medium'` to the reset.
-8. **`accuracy.ts:31` — Row match fails on leading-zero `No` ('01' vs '1').** Normalize via `String(r.No).replace(/^0+/, '') || '0'` on both sides.
+4. ~~**`accuracy.ts:14` — Division by zero → `Infinity`.**~~ ✅ Guarded `q !== 0`; emits `"Suggested Unit Price: N/A (qty = 0)"` and `suggestedPrice: 0` when qty is zero.
+5. ~~**`ExtractionPanel.tsx:30` — Empty prompt persists via `?? PROMPT`.**~~ ✅ Initializer uses `|| PROMPT`; `handlePromptChange` removes the localStorage key when the value is whitespace-only.
+6. ~~**`ExtractionPanel.tsx:54` — Double-tap race on `Start Extraction`.**~~ ✅ Added `runningRef = useRef(false)` synchronous mutex; flipped before any await; released in `finally` block.
+7. ~~**`useAppState.ts:36` — `SET_PROVIDER` does not reset `reasoningEffort`.**~~ ✅ Reducer now resets `reasoningEffort: 'medium'` alongside `endpoint/model/apiKey`.
+8. ~~**`accuracy.ts:31` — Row match fails on leading-zero `No` ('01' vs '1').**~~ ✅ New `normalizeNo()` helper trims + drops leading zeros; applied in row lookup, `truthByNo` map, and `extraRows` filter.
 
 ### Tier 3 — Defensive / UX
 
