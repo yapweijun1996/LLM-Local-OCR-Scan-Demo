@@ -148,7 +148,7 @@ export default function ProviderConfig({ provider, config, onProviderChange, onC
                   key={m}
                   type="button"
                   className={`${s.modelPickerBtn} ${config.model === m ? s.modelPickerBtnActive : ''}`}
-                  onClick={() => onConfigChange('model', m)}
+                  onClick={() => { onConfigChange('model', m); setFetchState({ status: 'idle' }); }}
                 >
                   {m}
                 </button>
