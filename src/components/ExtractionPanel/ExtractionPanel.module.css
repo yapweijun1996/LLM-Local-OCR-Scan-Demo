@@ -1,0 +1,266 @@
+.panel {
+  scroll-margin-top: 20px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-soft);
+}
+
+.panelNum {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.panelTitle {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 740;
+  letter-spacing: 0;
+}
+
+.panelTitle em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.panelDesc {
+  max-width: 720px;
+  margin-top: 6px;
+  margin-bottom: 22px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* ── Prompt Editor ── */
+.promptSection {
+  margin-bottom: 16px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.promptToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background: var(--surface-secondary);
+  border: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.promptToggle:hover {
+  background: var(--surface-tertiary);
+}
+
+.promptToggleIcon {
+  font-size: 10px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.promptModifiedBadge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.promptBody {
+  border-top: 1px solid var(--separator);
+  padding: 12px 14px;
+  background: var(--surface);
+}
+
+.promptTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--separator);
+  border-radius: 6px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.promptTextarea:focus {
+  border-color: var(--accent);
+}
+
+.promptFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.promptChars {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.promptReset {
+  padding: 5px 12px;
+  border: 1px solid var(--separator-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.promptReset:hover:not(:disabled) {
+  background: var(--status-red-soft);
+  color: var(--status-red);
+  border-color: var(--status-red);
+}
+
+.promptReset:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.runBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  margin-bottom: 16px;
+}
+
+.runInfo {
+  min-width: 0;
+}
+
+.runTarget {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.runTarget b {
+  color: var(--text-primary);
+}
+
+.btnPrimary {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 10px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 740;
+  white-space: nowrap;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.arrow {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.logArea {
+  min-height: 160px;
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: #111113;
+  color: #f5f5f7;
+  padding: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.logEmpty {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.logLine {
+  margin-bottom: 2px;
+}
+
+.logTime {
+  color: rgba(255, 255, 255, 0.48);
+  margin-right: 12px;
+}
+
+.logInfo {
+  color: #f5f5f7;
+}
+
+.logOk {
+  color: #8fd99f;
+}
+
+.logWarn {
+  color: #ffd27a;
+}
+
+.logErr {
+  color: #ff9ba1;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 18px;
+  }
+
+  .panelTitle {
+    font-size: 24px;
+  }
+
+  .runBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .btnPrimary {
+    width: 100%;
+  }
+}

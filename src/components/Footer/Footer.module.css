@@ -1,0 +1,23 @@
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-top: 32px;
+  padding: 24px 0 6px;
+  border-top: 1px solid var(--separator);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.colophon {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

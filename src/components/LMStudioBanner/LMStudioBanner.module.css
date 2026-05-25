@@ -1,0 +1,30 @@
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0 0;
+  border: 1px solid var(--status-amber);
+  border-radius: 8px;
+  background: var(--status-amber-soft);
+  color: var(--status-amber);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.text strong {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 800;
+}
+
+.text code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}

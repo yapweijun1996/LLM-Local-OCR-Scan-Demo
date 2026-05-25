@@ -1,0 +1,208 @@
+.panel {
+  scroll-margin-top: 20px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-soft);
+}
+
+.panelNum {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.panelTitle {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 740;
+  letter-spacing: 0;
+}
+
+.panelTitle em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.panelDesc {
+  max-width: 720px;
+  margin-top: 6px;
+  margin-bottom: 22px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.providerBtn {
+  min-width: 0;
+  min-height: 118px;
+  padding: 16px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.providerBtn:hover {
+  background: var(--surface);
+  border-color: var(--separator-strong);
+}
+
+.providerBtn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.providerName {
+  margin-bottom: 6px;
+  font-size: 18px;
+  font-weight: 740;
+}
+
+.providerLoc {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.providerBadge {
+  display: inline-flex;
+  margin-top: 12px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--status-green-soft);
+  color: var(--status-green);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cloudBadge {
+  background: var(--status-amber-soft);
+  color: var(--status-amber);
+}
+
+.providerBtn.active .cloudBadge {
+  background: #ffffff;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.configField {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.configField label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.configField input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.configField input:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  outline: none;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ── Reasoning / Thinking Effort control ── */
+.effortField {
+  grid-column: 1 / -1;   /* full-width row */
+}
+
+.effortRow {
+  display: inline-flex;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.effortBtn {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-right: 1px solid var(--separator);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.effortBtn:last-child {
+  border-right: 0;
+}
+
+.effortBtn:hover:not(.effortActive) {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.effortActive {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.effortHint {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .providerGrid,
+  .configGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .panel {
+    padding: 18px;
+  }
+
+  .panelTitle {
+    font-size: 24px;
+  }
+}

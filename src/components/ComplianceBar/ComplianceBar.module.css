@@ -1,0 +1,39 @@
+.complianceBar {
+  display: flex;
+  gap: 8px;
+  padding: 14px 0;
+  overflow-x: auto;
+  align-items: center;
+  scrollbar-width: none;
+}
+
+.complianceBar::-webkit-scrollbar {
+  display: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: var(--status-green);
+  border-radius: 50%;
+}
+
+.icon {
+  color: var(--accent);
+  font-size: 13px;
+}

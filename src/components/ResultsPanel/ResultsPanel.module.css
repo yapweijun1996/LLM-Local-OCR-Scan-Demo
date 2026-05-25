@@ -1,0 +1,394 @@
+.panel {
+  scroll-margin-top: 20px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+}
+
+.panelNum {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.panelTitle {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 740;
+  letter-spacing: 0;
+}
+
+.panelTitle em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.panelDesc {
+  max-width: 720px;
+  margin-top: 6px;
+  margin-bottom: 22px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.emptyState {
+  border: 1px dashed var(--separator-strong);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  padding: 44px 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.emptyError {
+  border-color: var(--status-red);
+  background: var(--status-red-soft);
+  color: var(--status-red);
+}
+
+.accuracyCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  border-radius: 8px;
+  background: #1d1d1f;
+  color: #ffffff;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.accTitle {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+}
+
+.accName {
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 740;
+  margin-bottom: 18px;
+  overflow-wrap: anywhere;
+}
+
+.accGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.accStat {
+  min-width: 0;
+}
+
+.accLabel {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.accValue {
+  margin-top: 5px;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.accValueSm {
+  font-size: 18px;
+}
+
+.good {
+  color: #8fd99f;
+}
+
+.warn {
+  color: #ffd27a;
+}
+
+.bad {
+  color: #ff9ba1;
+}
+
+.accOverall {
+  display: grid;
+  place-items: center;
+  min-width: 150px;
+  padding-left: 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: center;
+}
+
+.accPercent {
+  color: #8ecbff;
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 760;
+}
+
+.accPercentSm {
+  font-size: 42px;
+}
+
+.accPercentLabel {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--surface-tertiary);
+  overflow-x: auto;
+}
+
+.tabBtn {
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tabBtn.tabActive {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.tabContent {
+  display: none;
+  padding-top: 16px;
+}
+
+.tabContentActive {
+  display: block;
+  padding-top: 16px;
+}
+
+.resultsTable {
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  overflow-x: auto;
+  background: var(--surface);
+}
+
+.resultsTable table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.resultsTable thead {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+
+.resultsTable th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--separator);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.resultsTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--separator);
+  vertical-align: top;
+  white-space: pre-line;
+}
+
+.resultsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.rowOk {
+  background: #ffffff;
+}
+
+.rowWarn {
+  background: var(--status-amber-soft);
+}
+
+.rowBad {
+  background: var(--status-red-soft);
+}
+
+.colNum {
+  width: 54px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.colMoney {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.checkOk {
+  background: var(--status-green-soft);
+  color: var(--status-green);
+}
+
+.checkBad {
+  background: var(--status-red-soft);
+  color: var(--status-red);
+}
+
+.rowIssue {
+  color: var(--status-red);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.jsonOutput {
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: #111113;
+  color: #f5f5f7;
+  padding: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.exportBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--separator);
+}
+
+.exportLabel {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.btnGhost {
+  min-height: 38px;
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  padding: 8px 13px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 740;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btnGhost:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.diffAllMatch {
+  border: 1px solid var(--status-green);
+  border-radius: 8px;
+  background: var(--status-green-soft);
+  color: var(--status-green);
+  padding: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.codeInline,
+.codeMismatch {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.codeMismatch {
+  color: var(--status-red);
+}
+
+@media (max-width: 860px) {
+  .accuracyCard {
+    grid-template-columns: 1fr;
+  }
+
+  .accGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .accOverall {
+    min-width: 0;
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+}
+
+@media (max-width: 560px) {
+  .panel {
+    padding: 18px;
+  }
+
+  .panelTitle {
+    font-size: 24px;
+  }
+
+  .accName {
+    font-size: 22px;
+  }
+
+  .accGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .exportBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .btnGhost {
+    width: 100%;
+  }
+}

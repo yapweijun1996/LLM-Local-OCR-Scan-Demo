@@ -1,0 +1,38 @@
+.appShell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 0 32px 40px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-top: 24px;
+}
+
+.mainFlow {
+  min-width: 0;
+}
+
+@media (max-width: 1080px) {
+  .appShell {
+    padding: 0 20px 32px;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .appShell {
+    padding: 0 14px 28px;
+  }
+
+  .workspace {
+    gap: 16px;
+    padding-top: 16px;
+  }
+}

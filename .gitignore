@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Generated / test output
+output/
+
+# Claude Code session data (may contain sensitive info)
+.claude/
+
+# OS / editor
+.DS_Store
+*.local
